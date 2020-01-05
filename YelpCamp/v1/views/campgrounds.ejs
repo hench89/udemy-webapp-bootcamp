@@ -17,21 +17,18 @@
         </div>
     </div>
 
-    <div class="row">
+    <div class="row text-center" style="display:flex; flex-wrap: wrap;">
 
         <% campgrounds.forEach(function(campground){ %>
         <div class="col-md-3 col-sm-6">
-            <img class="img-thumbnail" src="<%= campground.image %>" width="400px" height="240px">
-            <div class="caption">
+            <div class="thumbnail">
+                <img src="<%= campground.image %>">
                 <h4><%= campground.name %></h4>
             </div>
         </div>
         <% }) %>
 
     </div>
-    <a href="/campgrounds/new">Add new Campground</a><br><br>
-
-
 
 </div>
 
