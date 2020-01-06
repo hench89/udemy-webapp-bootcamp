@@ -54,6 +54,19 @@ app.get("/blogs/new", function(req, res){
     res.render("new");
 })
 
+app.post("/blogs/", function(req, res){
+    // create blog
+    // if error, stay on page new
+    // if success, redirect to the index
+    Blog.create(req.body.blog, function(err, newBlog){
+        if (err) {
+            res.render("new");
+        } else {
+            res.redirect("/blogs");
+        }
+    });
+})
+
 
 // START THE SERVER
 app.listen(3000, function(){
