@@ -1,5 +1,12 @@
 var mongoose = require("mongoose");
-mongoose.connect("mongodb://localhost/blog_demo_2");
+mongoose.connect('mongodb+srv://hench:6qUVx4U8kSe2YPVo@cluster0-d6nft.azure.mongodb.net/blogapp?retryWrites=true&w=majority', {
+    useNewUrlParser: true,
+    useCreateIndex: true
+}).then(() => {
+    console.log('connected to DB!');
+}).catch(err => {
+    console.log('ERROR: ', err.message);
+});
 
 var Post = require("./models/post");
 var User = require("./models/user");
