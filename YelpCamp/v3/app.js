@@ -26,18 +26,25 @@ seedDB();
 
 
 
+// ========================
+// LANDING PAGE ROUTE
+// ========================
 
-// ROUTES
 app.get('/', function(req, res){
     res.render('landing');
 })
+
+
+// ========================
+// CAMPGROUNDS ROUTES
+// ========================
 
 app.get('/campgrounds', function(req, res){
     Campground.find({}, function(err, allCampgrounds){
         if (err) {
             console.log("ERROR: ", err.message);
         } else {
-            res.render('index', {campgrounds: allCampgrounds});
+            res.render('campgrounds/index', {campgrounds: allCampgrounds});
         }
     })
 
@@ -61,7 +68,7 @@ app.post('/campgrounds', function(req, res){
 })
 
 app.get('/campgrounds/new', function(req, res){
-    res.render('new');
+    res.render('campgrounds/new');
 })
 
 
@@ -72,13 +79,56 @@ app.get('/campgrounds/:id', function(req, res){
             console.log(err);
         } else {
             // display campground
-            res.render("show", {campground: foundCampground});
+            res.render("campgrounds/show", {campground: foundCampground});
         }
     })
 });
 
 
+
+// ========================
+// COMMENT ROUTES
+// ========================
+
+app.get('/campgrounds/:id/comments/new', function(req, res){
+    Campground.findById(req.params.id, function(err, foundCampground){
+        if (err) {
+            console.log(err)
+        } else {
+            res.render("comments/new", {campground: foundCampground})
+        }
+    })
+})
+
+app.post('/campgrounds/:id/comments', function(req, res){
+    
+    // lookup campground using id
+    Campground.findById(req.params.id, function(err, foundCampground){
+        if (err) {
+            console.log(err);
+            res.redirect('/campgrounds');
+        } else {
+
+            // create new comment
+            Comment.create(req.body.comment, function(err, newComment){
+                if (err) {
+                    console.log(err);
+                } else {
+
+                    // connect new comment to campground
+                    foundCampground.comments.push(newComment);
+                    foundCampground.save();
+
+                     // redirect campground show page
+                    res.redirect('/campgrounds/' + foundCampground._id)
+                }
+            })
+        }
+    })
+
+})
+
 // START THE SERVER
-app.listen(3000, function(){
+app.listen(8080, function(){
     console.log('started listening on port 3000');
 })
