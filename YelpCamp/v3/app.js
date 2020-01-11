@@ -1,16 +1,19 @@
-// START MODULES
 var express         = require('express'),
     app             = express(),
     bodyParser      = require('body-parser'),
-    Campground      = require('./models/campground'),
-    mongoose        = require('mongoose');
+    mongoose        = require('mongoose'),
+    seedDB          = require('./seeds');
+
+// SCHEMAS
+var Campground      = require('./models/campground'),
+    Comment         = require('./models/comment');
 
 // CONFIG MODULES
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({extended: true}));
 
 // CONNECT TO DB
-mongoose.connect('mongodb+srv://hench:6qUVx4U8kSe2YPVo@cluster0-d6nft.azure.mongodb.net/?retryWrites=true&w=majority', {
+mongoose.connect('mongodb+srv://hench:6qUVx4U8kSe2YPVo@cluster0-d6nft.azure.mongodb.net/yelpcamp?retryWrites=true&w=majority', {
     useNewUrlParser: true,
     useCreateIndex: true
 }).then(() => {
@@ -19,18 +22,9 @@ mongoose.connect('mongodb+srv://hench:6qUVx4U8kSe2YPVo@cluster0-d6nft.azure.mong
     console.log('ERROR: ', err.message);
 })
 
+seedDB();
 
-/* Campground.create({
-    name: "Granite Hill",
-    image: "https://media-cdn.tripadvisor.com/media/photo-s/01/ef/e5/ea/view-from-jackson-lake.jpg",
-    description: "This is a huge granite hill. No bathrooms. Some water and a lot of beautiful granite."
-}, function(err, newEntry){
-    if (err) {
-        console.log(err);
-    } else {
-        console.log(newEntry);
-    }
-}) */
+
 
 
 // ROUTES
@@ -38,7 +32,6 @@ app.get('/', function(req, res){
     res.render('landing');
 })
 
-// get campgrounds page
 app.get('/campgrounds', function(req, res){
     Campground.find({}, function(err, allCampgrounds){
         if (err) {
@@ -50,7 +43,6 @@ app.get('/campgrounds', function(req, res){
 
 })
 
-// create new campground (post)
 app.post('/campgrounds', function(req, res){
     // read data from form
     var name = req.body.name;
@@ -66,18 +58,16 @@ app.post('/campgrounds', function(req, res){
             res.redirect("/campgrounds");
         }
     })
-
 })
 
-// get create new campground page
 app.get('/campgrounds/new', function(req, res){
     res.render('new');
 })
 
-// display more information about a specific campground
+
 app.get('/campgrounds/:id', function(req, res){
     // find campground with id
-    Campground.findById(req.params.id, function(err, foundCampground){
+    Campground.findById(req.params.id).populate("comments").exec(function(err, foundCampground){
         if (err) {
             console.log(err);
         } else {
