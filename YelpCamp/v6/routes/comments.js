@@ -3,45 +3,45 @@ var router = express.Router({mergeParams: true});
 var Campground = require('../models/campground');
 var Comment = require('../models/comment');
 
-// COMMENTS NEW
-router.get('/new', isLoggedIn, function(req, res){
-    Campground.findById(req.params.id, function(err, foundCampground){
-        if (err) {
-            console.log(err)
-        } else {
-            res.render("comments/new", {campground: foundCampground})
-        }
-    })
-})
-
-// COMMENTS CREATE
-router.post('/', isLoggedIn, function(req, res){
-    
-    // lookup campground using id
-    Campground.findById(req.params.id, function(err, foundCampground){
-        if (err) {
+//Comments New
+router.get("/new", isLoggedIn, function(req, res){
+    // find campground by id
+    console.log(req.params.id);
+    Campground.findById(req.params.id, function(err, campground){
+        if(err){
             console.log(err);
-            res.redirect('/campgrounds');
         } else {
-
-            // create new comment
-            Comment.create(req.body.comment, function(err, newComment){
-                if (err) {
-                    console.log(err);
-                } else {
-
-                    // connect new comment to campground
-                    foundCampground.comments.push(newComment);
-                    foundCampground.save();
-
-                     // redirect campground show page
-                    res.redirect('/campgrounds/' + foundCampground._id)
-                }
-            })
+             res.render("comments/new", {campground: campground});
         }
     })
+});
 
-})
+//Comments Create
+router.post("/",isLoggedIn,function(req, res){
+    //lookup campground using ID
+    Campground.findById(req.params.id, function(err, campground){
+        if(err){
+            console.log(err);
+            res.redirect("/campgrounds");
+        } else {
+         Comment.create(req.body.comment, function(err, comment){
+            if(err){
+                console.log(err);
+            } else {
+                //add username and id to comment
+                comment.author.id = req.user._id;
+                comment.author.username = req.user.username;
+                //save comment
+                comment.save();
+                campground.comments.push(comment);
+                campground.save();
+                console.log(comment);
+                res.redirect('/campgrounds/' + campground._id);
+            }
+         });
+        }
+    });
+ });
 
 // MIDDLEWARE
 function isLoggedIn(req, res, next){

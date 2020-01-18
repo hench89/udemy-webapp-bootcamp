@@ -3,7 +3,7 @@ var router = express.Router();
 var Campground = require('../models/campground');
 
 // SHOW ALL CAMPGROUNDS
-router.get('/', function(req, res){
+router.get('/', isLoggedIn, function(req, res){
     req.user
     Campground.find({}, function(err, allCampgrounds){
         if (err) {
@@ -16,12 +16,18 @@ router.get('/', function(req, res){
 })
 
 // CREATE NEW CAMPGROUND
-router.post('/', function(req, res){
+router.post('/', isLoggedIn, function(req, res){
     // read data from form
     var name = req.body.name;
     var image = req.body.image;
     var desc = req.body.desc;
-    var newCampGround = {name: name, image: image, description: desc};
+    var author = {
+        id: req.user._id,
+        username: req.user.username
+    };
+    var newCampGround = {name: name, image: image, description: desc, author: author};
+
+
     // create new campground and save to DB
     Campground.create(newCampGround, function(err, newlycreated){
         if (err) {
@@ -35,17 +41,18 @@ router.post('/', function(req, res){
 
 // CREATE NEW CAMPGROUND FORM
 router.get('/new', function(req, res){
-    res.render('/new');
+    res.render('campgrounds/new');
 })
 
 // SHOW SPECIFIC CAMPGROUNDS
-router.get('/:id', function(req, res){
+router.get('/:id', isLoggedIn, function(req, res){
     // find campground with id
     Campground.findById(req.params.id).populate("comments").exec(function(err, foundCampground){
         if (err) {
             console.log(err);
         } else {
             // display campground
+            console.log(foundCampground)
             res.render("campgrounds/show", {campground: foundCampground});
         }
     })
