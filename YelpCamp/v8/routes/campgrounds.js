@@ -3,7 +3,7 @@ const router            = express.Router();
 const Campground        = require('../models/campground');
 const middleware        = require('../middleware');
 
-// SHOW ALL CAMPGROUNDS
+// INDEX (SHOW ALL CAMPGROUNDS)
 router.get('/', function(req, res){
     Campground.find({}, function(err, allCampgrounds){
         if (err) {
@@ -20,13 +20,14 @@ router.post('/', middleware.isLoggedIn, function(req, res){
 
     // read data from form
     var name = req.body.name;
+    var price = req.body.price;
     var image = req.body.image;
     var desc = req.body.desc;
     var author = {
         id: req.user._id,
         username: req.user.username
     };
-    var newCampGround = {name: name, image: image, description: desc, author: author};
+    var newCampGround = {name: name, price: price, image: image, description: desc, author: author};
 
     // create new campground and save to DB
     Campground.create(newCampGround, function(err, newlycreated){
@@ -40,7 +41,7 @@ router.post('/', middleware.isLoggedIn, function(req, res){
 })
 
 // CREATE NEW CAMPGROUND FORM
-router.get('/new', middleware.checkCampgroundOwnership, function(req, res){
+router.get('/new', middleware.isLoggedIn, function(req, res){
     res.render('campgrounds/new');
 })
 
@@ -61,7 +62,12 @@ router.get('/:id', function(req, res){
 // EDIT CAMPGROUND ROUTE
 router.get('/:id/edit', middleware.checkCampgroundOwnership, function(req, res) {
     Campground.findById(req.params.id, function(err, foundCampground) {
-        res.render('campgrounds/edit', {campground : foundCampground});
+        if (err) {
+            req.flash("error", "Could not find Campground");
+            res.redirect("back");
+        } else {
+            res.render('campgrounds/edit', {campground : foundCampground});
+        }
     })
 });
 
@@ -87,6 +93,7 @@ router.delete('/:id', middleware.checkCampgroundOwnership, function(req, res){
         if (err) {
             res.redirect('/campgrounds')
         } else {
+            req.flash("success", "Successfully deleted Campground");
             res.redirect('/campgrounds');
         }
     })

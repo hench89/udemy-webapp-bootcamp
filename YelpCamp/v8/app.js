@@ -7,7 +7,8 @@ const express       = require('express'),
     LocalStrategy   = require('passport-local'),
     MethodOverride  = require('method-override'),
     router          = express.Router({mergeParams: true}),
-    seedDB          = require('./seeds');
+    seedDB          = require('./seeds'),
+    flash           = require('connect-flash');
 
 // REQUIRING ROUTES
 var commentRoutes       = require('./routes/comments'),
@@ -22,6 +23,7 @@ app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(MethodOverride("_method"));
 app.use(express.static(__dirname + "/public"));
+app.use(flash());
 
 // PASSPORT CONFIG
 app.use(require('express-session')({
@@ -37,6 +39,8 @@ passport.deserializeUser(User.deserializeUser());
 
 app.use(function(req, res, next){ // pass through current user variable on every request
     res.locals.currentUser = req.user;
+    res.locals.error = req.flash("error");
+    res.locals.success = req.flash("success");
     next();
 });
 

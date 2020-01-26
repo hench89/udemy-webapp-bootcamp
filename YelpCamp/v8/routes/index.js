@@ -5,7 +5,7 @@ const User      = require('../models/user');
 
 // ROOT ROUTE
 router.get('/', function(req, res){
-    res.redirect('/campgrounds/');
+    res.render('landing')
 })
 
 // SHOW REGISTER FORM
@@ -20,10 +20,11 @@ router.post('/register', function(req, res){
     var newUser = new User({username: req.body.username});
     User.register(newUser, req.body.password, function(err, user){
         if (err) {
-            console.log(err);
+            req.flash("error", err.message);
             return res.render('register')
         } else {
             passport.authenticate("local")(req, res, function(){
+                req.flash("success", "Welcome to YeplCamp " + user.username);
                 res.redirect('/campgrounds/');
             });
         }
@@ -45,16 +46,8 @@ router.post('/login', passport.authenticate("local",
 // LOGOUT ROUTE
 router.get('/logout', function(req, res){
     req.logout();
+    req.flash("success", "Logged you out!");
     res.redirect('/campgrounds');
 })
-
-
-// MIDDLEWARE
-function isLoggedIn(req, res, next){
-    if (req.isAuthenticated()){
-        return next();
-    }
-    res.redirect('/login');
-}
 
 module.exports = router;
