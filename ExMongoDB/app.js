@@ -1,5 +1,5 @@
 var mongoose = require('mongoose');
-mongoose.connect('mongodb+srv://hench:6qUVx4U8kSe2YPVo@cluster0-d6nft.azure.mongodb.net/test?retryWrites=true&w=majority', {
+mongoose.connect('mongodb+srv://....', {
     useNewUrlParser: true,
     useCreateIndex: true
 }).then(() => {
