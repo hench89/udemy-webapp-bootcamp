@@ -1,12 +1,16 @@
 // DEPENDENCIES
-var express         = require('express'),
+const express       = require('express'),
     app             = express(),
     bodyParser      = require('body-parser'),
     mongoose        = require('mongoose'),
     passport        = require('passport'),
     LocalStrategy   = require('passport-local'),
+    MethodOverride  = require('method-override'),
     router          = express.Router({mergeParams: true}),
-    seedDB          = require('./seeds');
+    seedDB          = require('./seeds'),
+    flash           = require('connect-flash'),
+    dotenv          = require('dotenv');
+
 
 // REQUIRING ROUTES
 var commentRoutes       = require('./routes/comments'),
@@ -17,9 +21,12 @@ var commentRoutes       = require('./routes/comments'),
 var User = require('./models/user');
 
 // CONFIG MODULES
+dotenv.config();
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({extended: true}));
+app.use(MethodOverride("_method"));
 app.use(express.static(__dirname + "/public"));
+app.use(flash());
 
 // PASSPORT CONFIG
 app.use(require('express-session')({
@@ -35,6 +42,8 @@ passport.deserializeUser(User.deserializeUser());
 
 app.use(function(req, res, next){ // pass through current user variable on every request
     res.locals.currentUser = req.user;
+    res.locals.error = req.flash("error");
+    res.locals.success = req.flash("success");
     next();
 });
 
@@ -44,18 +53,18 @@ app.use("/campgrounds/:id/comments", commentRoutes);
 
 
 // CONNECT TO DB
-var dbname = 'yelpcamp'
-mongoose.connect('mongodb+srv://hench:6qUVx4U8kSe2YPVo@cluster0-d6nft.azure.mongodb.net/' + dbname + '?retryWrites=true&w=majority', {
+mongoose.connect(process.env.DB_URL, {
     useNewUrlParser: true,
     useCreateIndex: true
 }).then(() => {
     console.log('connected to DB!');
 }).catch(err => {
-    console.log('ERROR: ', err.message);
+    console.log(err.message);
 })
 //seedDB();
 
 // START THE SERVER
-app.listen(8080, function(){
-    console.log('started listening on port 8080');
-})
+var port = process.env.PORT || 8080;
+app.listen(port, function () {
+    console.log("Server Has Started!");
+});
